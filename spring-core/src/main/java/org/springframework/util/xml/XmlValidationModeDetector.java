@@ -87,22 +87,31 @@ public class XmlValidationModeDetector {
 	 * @throws IOException in case of I/O failure
 	 * @see #VALIDATION_DTD
 	 * @see #VALIDATION_XSD
+	 *
+	 * XML 验证模式检测
+	 *
+	 * DTD 的XML开头为：<!DOCTYPE note SYSTEM "note.dtd">
+	 *
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		try {
+			// 是否为 DTD 校验模式。默认为，非 DTD 模式，即 XSD 模式
 			boolean isDtdValidated = false;
 			String content;
 			while ((content = reader.readLine()) != null) {
+				// 跳过注释
 				content = consumeCommentTokens(content);
 				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
+				// 包含 DOCTYPE，为 DTD 验证模式
 				if (hasDoctype(content)) {
 					isDtdValidated = true;
 					break;
 				}
+				// hasOpeningTag 方法会校验，如果这一行有 < ，并且 < 后面跟着的是字母，则返回 true
 				if (hasOpeningTag(content)) {
 					// End of meaningful data...
 					break;
